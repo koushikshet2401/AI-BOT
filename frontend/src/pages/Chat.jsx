@@ -101,7 +101,7 @@ const Chat = () => {
 					<>
 						{chatMessages.length === 0 && (
 							<div className={styles.no_msgs}>
-								<h3>GPT 3.5 TURBO</h3>
+								<h3>GROQ</h3>
 								<motion.div className={styles.no_msg_logo}>
 									<img src={noMsgBot} alt="no msg bot" />
 								</motion.div>

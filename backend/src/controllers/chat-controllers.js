@@ -1,5 +1,5 @@
 import User from "../models/user-model.js";
-import genAI from "../configs/gemini-config.js";
+import { generateText } from "../services/ai/groq-service.js";
 
 // Generate Chat Response
 export const generateChatCompletion = async (req, res) => {
@@ -13,28 +13,8 @@ export const generateChatCompletion = async (req, res) => {
 			});
 		}
 
-		// Build conversation history
-		const history = user.chats
-			.map(chat => `${chat.role}: ${chat.content}`)
-			.join("\n");
-
-		const prompt = `
-Previous conversation:
-${history}
-
-User: ${message}
-Assistant:
-`;
-
-		// ✅ SAFE MODEL (very important)
-const model = genAI.getGenerativeModel({
-    model: "gemini-pro",
-});
-
-
-
-		const result = await model.generateContent(prompt);
-		const aiResponse = result.response.text();
+		// ✅ CALL GROQ
+		const aiResponse = await generateText(message);
 
 		// Save chats
 		user.chats.push({ role: "user", content: message });
@@ -45,10 +25,11 @@ const model = genAI.getGenerativeModel({
 		return res.status(200).json({ chats: user.chats });
 
 	} catch (error) {
-		console.error("Gemini Error:", error);
+		console.error("AI Error:", error);
 		return res.status(500).json({ message: error.message });
 	}
 };
+
 
 
 // Get All Chats

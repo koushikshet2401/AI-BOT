@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import styles from "./Logo.module.css";
-import logo from "/logos/home-bot-icon.png";
+import logo from "/logos/icons8-bot-100 (1).png";
 
 const Logo = () => {
 	return (
@@ -9,7 +9,7 @@ const Logo = () => {
 				<img src={logo} alt="logo" className={styles.logo} />
 			</Link>
 			<p className={styles.logo_p}>
-				<span className={styles.span}>MERN-GPT</span>
+				<span className={styles.span}>Nexa-AI</span>
 			</p>
 		</div>
 	);
