@@ -1,34 +1,53 @@
+import Enquiry from "../models/enquiry-model.js";
 import User from "../models/user-model.js";
 import { generateText } from "../services/ai/groq-service.js";
 
+
 // Generate Chat Response
 export const generateChatCompletion = async (req, res) => {
-	try {
-		const { message } = req.body;
+  try {
+    const { message } = req.body;
 
-		const user = await User.findById(res.locals.jwtData.id);
-		if (!user) {
-			return res.status(401).json({
-				message: "User not registered or token invalid",
-			});
-		}
+    const user = await User.findById(res.locals.jwtData.id);
 
-		// ✅ CALL GROQ
-		const aiResponse = await generateText(message);
+    if (!user) {
+      return res.status(401).json({
+        message: "User not registered or token invalid",
+      });
+    }
 
-		// Save chats
-		user.chats.push({ role: "user", content: message });
-		user.chats.push({ role: "assistant", content: aiResponse });
+    // ✅ CALL GROQ
+    const aiResponse = await generateText(message);
 
-		await user.save();
+    // ✅ Save chat in user document (your existing logic)
+    user.chats.push({ role: "user", content: message });
+    user.chats.push({ role: "assistant", content: aiResponse });
 
-		return res.status(200).json({ chats: user.chats });
+    await user.save();
 
-	} catch (error) {
-		console.error("AI Error:", error);
-		return res.status(500).json({ message: error.message });
-	}
+    // ⭐ SMART LOGIC → detect if AI is unsure
+    const needsHuman =
+      aiResponse.toLowerCase().includes("i don't know") ||
+      aiResponse.toLowerCase().includes("contact support");
+
+    // ✅ SAVE ENQUIRY (CRM FEATURE)
+    await Enquiry.create({
+      name: user.name,
+      email: user.email,
+      query: message,
+      aiResponse: aiResponse,
+      user: user._id,
+      needsHuman: needsHuman,
+    });
+
+    return res.status(200).json({ chats: user.chats });
+
+  } catch (error) {
+    console.error("AI Error:", error);
+    return res.status(500).json({ message: error.message });
+  }
 };
+
 
 
 

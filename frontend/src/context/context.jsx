@@ -1,76 +1,77 @@
 import {
-	userLogin,
-	getAuthStatus,
-	logoutUser,
-	userSignup,
+  userLogin,
+  getAuthStatus,
+  logoutUser,
+  userSignup,
 } from "../../helpers/api-functions";
 
-import {
-	createContext,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 const AuthContext = createContext(null);
 
-// Provider Component
 export const AuthProvider = ({ children }) => {
-	const [user, setUser] = useState(null);
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [user, setUser] = useState(null);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [loading, setLoading] = useState(true); // ⭐ important
 
-	// Check if user cookies are valid
-	useEffect(() => {
-		const checkAuthStatus = async () => {
-			try {
-				const data = await getAuthStatus();
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const data = await getAuthStatus();
 
-				if (data) {
-					setUser({ email: data.email, name: data.name });
-					setIsLoggedIn(true);
-				}
-			} catch (err) {
-				console.log("User not authenticated");
-			}
-		};
+        if (data?.email) {
+          setUser(data);
+          setIsLoggedIn(true);
+        }
+      } catch (err) {
+        console.log("Not authenticated");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-		checkAuthStatus();
-	}, []);
+    checkAuth();
+  }, []);
 
-	const login = async (email, password) => {
-		const data = await userLogin(email, password);
+  const login = async (email, password) => {
+    const data = await userLogin(email, password);
+    if (data) {
+      setUser(data);
+      setIsLoggedIn(true);
+    }
+  };
 
-		if (data) {
-			setUser({ email: data.email, name: data.name });
-			setIsLoggedIn(true);
-		}
-	};
+  const signup = async (name, email, password) => {
+    const data = await userSignup(name, email, password);
+    if (data) {
+      setUser(data);
+      setIsLoggedIn(true);
+    }
+  };
 
-	const signup = async (name, email, password) => {
-		await userSignup(name, email, password);
-	};
+  const logout = async () => {
+    await logoutUser();
+    setUser(null);
+    setIsLoggedIn(false);
+  };
 
-	const logout = async () => {
-		await logoutUser();
-		setIsLoggedIn(false);
-		setUser(null);
-		window.location.reload();
-	};
+  const value = {
+    user,
+    isLoggedIn,
+    login,
+    logout,
+    signup,
+  };
 
-	const value = {
-		user,
-		isLoggedIn,
-		login,
-		logout,
-		signup,
-	};
+  // ⭐ Prevent app from rendering before auth check
+  if (loading) return <div />;
 
-	return (
-		<AuthContext.Provider value={value}>
-			{children}
-		</AuthContext.Provider>
-	);
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
 };
 
-// Custom Hook
 export const useAuth = () => useContext(AuthContext);

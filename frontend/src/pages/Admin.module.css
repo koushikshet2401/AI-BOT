@@ -1,0 +1,41 @@
+.container {
+  padding: 40px;
+  color: white;
+}
+
+.dateBlock {
+  border: 1px solid #00ffff44;
+  margin-bottom: 20px;
+  padding: 20px;
+  border-radius: 10px;
+}
+
+.summary {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.date {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+button {
+  background: #00ffff;
+  color: black;            /* ⭐ VERY IMPORTANT */
+  border: none;
+  padding: 8px 14px;
+  cursor: pointer;
+  border-radius: 6px;
+  font-weight: bold;
+}
+
+
+.queryBox {
+  margin-top: 15px;
+  padding: 15px;
+  background: #00000055;
+  border-radius: 8px;
+}
+
